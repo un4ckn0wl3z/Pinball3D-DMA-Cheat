@@ -39,8 +39,10 @@ int main()
 
 	auto score = mem.ReadChain(base, offsets);
 	printf("current score: %d\n", (DWORD)score);
-	printf("score addy: 0x%p\n", reinterpret_cast<void*>(ReadChainAddy(mem, base, offsets)));
+	auto scoreAddy = reinterpret_cast<void*>(ReadChainAddy(mem, base, offsets));
+	printf("score addy: 0x%p\n", scoreAddy);
 
+	mem.Write<int>(reinterpret_cast<uint64_t>(scoreAddy) + offsets.at(offsets.size()), 999999);
 
 	return 0;
 }
