@@ -4,13 +4,13 @@
 #include <vector>
 #include "DMALibrary/Memory/Memory.h"
 
-uint64_t ReadChainAddy(uint64_t base, const std::vector<uint64_t>& offsets)
+uint64_t ReadChainAddy(Memory& m, uint64_t base, const std::vector<uint64_t>& offsets)
 {
-	uint64_t result = mem.Read<uint64_t>(base + offsets.at(0));
+	uint64_t result = m.Read<uint64_t>(base + offsets.at(0));
 	for (int i = 1; i < offsets.size() - 1; i++) {
-		result = mem.Read<uint64_t>(result + offsets.at(i));
+		result = m.Read<uint64_t>(result + offsets.at(i));
 	}
-	return result + offsets.at(offsets.size());
+	return result;
 }
 
 int main()
@@ -23,6 +23,14 @@ int main()
 
 	printf("DMA initilized\n");
 
+	/*
+	auto moduleList = mem.GetModuleList("SpaceCadetPinball.exe");
+
+	for (auto item : moduleList)
+	{
+		std::cout << "[+] module: " << item << std::endl;
+	}
+	*/
 
 	uintptr_t base = mem.GetBaseDaddy("SpaceCadetPinball.exe");
 	printf("SpaceCadetPinball.exe base: 0x%llX\n", base);
@@ -31,14 +39,7 @@ int main()
 
 	auto score = mem.ReadChain(base, offsets);
 	printf("current score: %d\n", (DWORD)score);
-	auto scoreAddy = reinterpret_cast<void*>(ReadChainAddy(base, offsets));
-	printf("score addy: 0x%p\n", scoreAddy);
-
-	printf("Press any key to hack the score\n");
-	getchar();
-
-	mem.Write<int>((uintptr_t)scoreAddy, 99999);
-
+	printf("score addy: 0x%p\n", reinterpret_cast<void*>(ReadChainAddy(mem, base, offsets)));
 
 
 	return 0;
