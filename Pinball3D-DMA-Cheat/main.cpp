@@ -4,12 +4,13 @@
 #include <vector>
 #include "DMALibrary/Memory/Memory.h"
 
-uint64_t ReadChainAddy(Memory& m, uint64_t base, const std::vector<uint64_t>& offsets)
+uint64_t FindChainAddy(Memory& m, uint64_t base, const std::vector<uint64_t>& offsets)
 {
 	uint64_t result = m.Read<uint64_t>(base + offsets.at(0));
 	for (int i = 1; i < offsets.size() - 1; i++) {
 		result = m.Read<uint64_t>(result + offsets.at(i));
 	}
+	result += offsets.back();
 	return result;
 }
 
@@ -23,15 +24,6 @@ int main()
 
 	printf("DMA initilized\n");
 
-	/*
-	auto moduleList = mem.GetModuleList("SpaceCadetPinball.exe");
-
-	for (auto item : moduleList)
-	{
-		std::cout << "[+] module: " << item << std::endl;
-	}
-	*/
-
 	uintptr_t base = mem.GetBaseDaddy("SpaceCadetPinball.exe");
 	printf("SpaceCadetPinball.exe base: 0x%llX\n", base);
 
@@ -39,7 +31,7 @@ int main()
 
 	auto score = mem.ReadChain(base, offsets);
 	printf("current score: %d\n", (DWORD)score);
-	auto scoreAddy = reinterpret_cast<void*>(ReadChainAddy(mem, base, offsets) + 0x84) ;
+	auto scoreAddy = reinterpret_cast<void*>(FindChainAddy(mem, base, offsets)) ;
 	printf("score addy: 0x%p\n", scoreAddy);
 
 	int newVal = 999999;
